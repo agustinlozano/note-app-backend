@@ -1,0 +1,31 @@
+{
+  "name": "note-app-backend",
+  "version": "1.0.0",
+  "description": "Backend for notes-app",
+  "main": "index.js",
+  "dependencies": {
+    "cors": "2.8.5",
+    "dotenv": "16.0.0",
+    "express": "4.17.2",
+    "mongoose": "6.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "2.0.15"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "deploy": "git push heroku master",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agustinlozano/note-app-backend.git"
+  },
+  "author": "Agustin Lozano Blua",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/agustinlozano/note-app-backend/issues"
+  },
+  "homepage": "https://github.com/agustinlozano/note-app-backend#readme"
+}
