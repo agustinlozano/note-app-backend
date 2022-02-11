@@ -5,8 +5,8 @@ const config = require('./utils/config')
 
 const server = http.createServer(app)
 
-server.listen(config.PORT, () => {
-  logger.info(`Server running on port ${config.PORT}`)
+server.listen(config.LOCAL, () => {
+  logger.info(`Server running on port ${config.LOCAL}`)
 })
 
 module.exports = server
