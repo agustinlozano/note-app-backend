@@ -23,6 +23,7 @@ mongoose.connect(config.MONGODB_URI)
 process.on('uncaughtException', () => mongoose.connection.close())
 
 app.use(cors())
+app.use(express.static('build'))
 app.use(express.json())
 app.use(requestLogger)
 
