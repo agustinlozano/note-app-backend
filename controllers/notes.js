@@ -16,10 +16,8 @@ noteRouser.post('/', async (request, response, next) => {
     importance: importance || false
   })
 
-  try {
-    const savedNote = await newNote.save()
-    response.json(savedNote)
-  } catch (exception) { next(exception) }
+  const savedNote = await newNote.save()
+  response.status(201).json(savedNote)
 })
 
 module.exports = noteRouser
