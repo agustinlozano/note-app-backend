@@ -69,6 +69,17 @@ describe('POST /api/notes', () => {
   })
 })
 
+describe('when an unknown endpoint is passed as a route', () => {
+  test('returns a status code 404', async () => {
+    const unknownEndpoint = '/an/Invalid/RouteLikeThis'
+
+    await api
+      .get(unknownEndpoint)
+      .expect(404)
+      .expect({ error: 'unknown endpoint' })
+  })
+})
+
 afterAll(() => {
   server.close()
   mongoose.connection.close()
