@@ -8,7 +8,7 @@ noteRouser.get('/', async (request, response) => {
 
 noteRouser.post('/', async (request, response, next) => {
   const body = request.body
-  const { content, importance} = body
+  const { content, importance } = body
 
   const newNote = new Note({
     content,
@@ -17,7 +17,7 @@ noteRouser.post('/', async (request, response, next) => {
   })
 
   try {
-    const savedNote =  await newNote.save()
+    const savedNote = await newNote.save()
     response.json(savedNote)
   } catch (exception) { next(exception) }
 })
