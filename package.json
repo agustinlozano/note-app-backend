@@ -10,7 +10,8 @@
     "mongoose": "6.2.1"
   },
   "devDependencies": {
-    "nodemon": "2.0.15"
+    "nodemon": "2.0.15",
+    "standard": "16.0.4"
   },
   "scripts": {
     "start": "node index.js",
@@ -27,5 +28,11 @@
   "bugs": {
     "url": "https://github.com/agustinlozano/note-app-backend/issues"
   },
-  "homepage": "https://github.com/agustinlozano/note-app-backend#readme"
+  "homepage": "https://github.com/agustinlozano/note-app-backend#readme",
+  "eslintConfig": {
+    "extends": "./node_modules/standard/eslintrc.json",
+    "env": {
+      "jest": true
+    }
+  }
 }
