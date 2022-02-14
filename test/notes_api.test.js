@@ -4,10 +4,12 @@ const Note = require('../models/Note')
 const _ = require('lodash')
 const {
   api,
-  initialNotes,
-  getAllFromNotes,
   nonexistentId
 } = require('./helpers')
+const {
+  getNotesResponse,
+  initialNotes
+} = require('./notes_helper')
 
 beforeEach(async () => {
   await Note.deleteMany({})
@@ -20,7 +22,7 @@ beforeEach(async () => {
 
 describe('test the initial notes', () => {
   test('how many notes are', async () => {
-    const { response: notes } = await getAllFromNotes()
+    const { response: notes } = await getNotesResponse()
 
     expect(notes).toHaveLength(initialNotes.length)
   })
@@ -48,7 +50,7 @@ describe('POST /api/notes', () => {
       .expect(201)
       .expect('Content-Type', /json/)
 
-    const { response: notesAtEnd, contents } = await getAllFromNotes()
+    const { response: notesAtEnd, contents } = await getNotesResponse()
 
     expect(notesAtEnd).toHaveLength(initialNotes.length + 1)
     expect(contents).toContain('Cats are really funny pets')
@@ -65,7 +67,7 @@ describe('POST /api/notes', () => {
       .expect(400)
       .expect({ error: 'Note validation failed: content: Path `content` is required.' })
 
-    const { response: notesAtEnd } = await getAllFromNotes()
+    const { response: notesAtEnd } = await getNotesResponse()
 
     expect(notesAtEnd).toHaveLength(initialNotes.length)
   })
@@ -82,7 +84,7 @@ describe('POST /api/notes', () => {
       .expect(201)
       .expect('Content-Type', /json/)
 
-    const { response: notesAtEnd } = await getAllFromNotes()
+    const { response: notesAtEnd } = await getNotesResponse()
     const lastNoteAdded = _.last(notesAtEnd)
 
     expect(notesAtEnd).toHaveLength(initialNotes.length + 1)
@@ -92,7 +94,7 @@ describe('POST /api/notes', () => {
 
 describe('GET /api/notes/id', () => {
   test('a note can be viewed', async () => {
-    const { response: notes } = await getAllFromNotes()
+    const { response: notes } = await getNotesResponse()
     const note = notes[0]
 
     await api
@@ -118,7 +120,7 @@ describe('GET /api/notes/id', () => {
 
 describe('DELETE /api/notes/id', () => {
   test('a note can be deleted', async () => {
-    const { response: notes } = await getAllFromNotes()
+    const { response: notes } = await getNotesResponse()
     const note = notes[0]
 
     await api
@@ -143,7 +145,7 @@ describe('DELETE /api/notes/id', () => {
 
 describe('PUT /api/notes/id', () => {
   test('a note body can ben updated', async () => {
-    const { response: notes } = await getAllFromNotes()
+    const { response: notes } = await getNotesResponse()
     const note = notes[0]
 
     const updatedNote = {
@@ -157,7 +159,7 @@ describe('PUT /api/notes/id', () => {
       .send(updatedNote)
       .expect(204)
 
-    const { contents } = await getAllFromNotes()
+    const { contents } = await getNotesResponse()
 
     expect(contents).toContain('This is the new content for this note')
   })
