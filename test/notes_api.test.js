@@ -5,7 +5,8 @@ const _ = require('lodash')
 const {
   api,
   initialNotes,
-  getAllFromNotes
+  getAllFromNotes,
+  nonexistentId
 } = require('./helpers')
 
 beforeEach(async () => {
@@ -86,6 +87,93 @@ describe('POST /api/notes', () => {
 
     expect(notesAtEnd).toHaveLength(initialNotes.length + 1)
     expect(lastNoteAdded.importance).toBe(false)
+  })
+})
+
+describe('GET /api/notes/id', () => {
+  test('a note can be viewed', async () => {
+    const { response: notes } = await getAllFromNotes()
+    const note = notes[0]
+
+    await api
+      .get(`/api/notes/${note.id}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
+  })
+
+  test('fails with status code 404 when a nonexistent id is passed', async () => {
+    const id = await nonexistentId()
+
+    await api
+      .get(`/api/notes/${id}`)
+      .expect(404)
+  })
+
+  test('fails with status code 400 when an ivalid id is passed', async () => {
+    await api
+      .get('/api/notes/12345')
+      .expect(400)
+  })
+})
+
+describe('DELETE /api/notes/id', () => {
+  test('a note can be deleted', async () => {
+    const { response: notes } = await getAllFromNotes()
+    const note = notes[0]
+
+    await api
+      .delete(`/api/notes/${note.id}`)
+      .expect(204)
+  })
+
+  test('fails with status code 404 when a nonexisting id is passed', async () => {
+    const id = await nonexistentId()
+
+    await api
+      .delete(`/api/notes/${id}`)
+      .expect(404)
+  })
+
+  test('fails with status code 400 when an ivalid id is passed', async () => {
+    await api
+      .delete('/api/notes/12345')
+      .expect(400)
+  })
+})
+
+describe('PUT /api/notes/id', () => {
+  test('a note body can ben updated', async () => {
+    const { response: notes } = await getAllFromNotes()
+    const note = notes[0]
+
+    const updatedNote = {
+      content: 'This is the new content for this note',
+      date: new Date(),
+      importance: undefined
+    }
+
+    await api
+      .put(`/api/notes/${note.id}`)
+      .send(updatedNote)
+      .expect(204)
+
+    const { contents } = await getAllFromNotes()
+
+    expect(contents).toContain('This is the new content for this note')
+  })
+
+  test('fails with status code 404 when a nonexisting id is passed', async () => {
+    const id = await nonexistentId()
+
+    await api
+      .put(`/api/notes/${id}`)
+      .expect(404)
+  })
+
+  test('fails with status code 400 when an ivalid id is passed', async () => {
+    await api
+      .put('/api/notes/12345')
+      .expect(400)
   })
 })
 
