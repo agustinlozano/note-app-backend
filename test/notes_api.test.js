@@ -1,6 +1,7 @@
 const server = require('../index')
 const mongoose = require('mongoose')
 const Note = require('../models/Note')
+const _ = require('lodash')
 const {
   api,
   initialNotes,
@@ -66,6 +67,25 @@ describe('POST /api/notes', () => {
     const { response: notesAtEnd } = await getAllFromNotes()
 
     expect(notesAtEnd).toHaveLength(initialNotes.length)
+  })
+
+  test('if a new note has no importance true then it is assigned to false', async () => {
+    const unimportantNote = {
+      content: 'This note is not important',
+      importance: undefined
+    }
+
+    await api
+      .post('/api/notes')
+      .send(unimportantNote)
+      .expect(201)
+      .expect('Content-Type', /json/)
+
+    const { response: notesAtEnd } = await getAllFromNotes()
+    const lastNoteAdded = _.last(notesAtEnd)
+
+    expect(notesAtEnd).toHaveLength(initialNotes.length + 1)
+    expect(lastNoteAdded.importance).toBe(false)
   })
 })
 
