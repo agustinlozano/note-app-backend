@@ -18,8 +18,9 @@ const getUserResponse = async () => {
   const usernames = response.map(user => user.username)
   const names = response.map(user => user.name)
   const passwordsHash = response.map(user => user.passwordHash)
+  const ids = response.map(user => user._id)
 
-  return { response, usernames, names, passwordsHash }
+  return { response, usernames, names, passwordsHash, ids }
 }
 
 module.exports = {

@@ -10,6 +10,7 @@ const {
   getNotesResponse,
   initialNotes
 } = require('./notes_helper')
+const { getUserResponse } = require('./users_helper')
 
 beforeEach(async () => {
   await Note.deleteMany({})
@@ -39,9 +40,11 @@ describe('GET /api/notes', () => {
 
 describe('POST /api/notes', () => {
   test('success with status code 201 when a valid note is passed', async () => {
+    const { ids } = await getUserResponse()
     const newNote = {
       content: 'Cats are really funny pets',
-      importance: true
+      importance: true,
+      user: ids[0]
     }
 
     await api
@@ -57,8 +60,10 @@ describe('POST /api/notes', () => {
   })
 
   test('fails with status code 400 when an invalid note is passed', async () => {
+    const { ids } = await getUserResponse()
     const invalidNote = {
-      importance: true
+      importance: true,
+      user: ids[0]
     }
 
     await api
@@ -73,9 +78,11 @@ describe('POST /api/notes', () => {
   })
 
   test('if a new note has no importance true then it is assigned to false', async () => {
+    const { ids } = await getUserResponse()
     const unimportantNote = {
       content: 'This note is not important',
-      importance: undefined
+      importance: undefined,
+      user: ids[0]
     }
 
     await api
@@ -89,6 +96,23 @@ describe('POST /api/notes', () => {
 
     expect(notesAtEnd).toHaveLength(initialNotes.length + 1)
     expect(lastNoteAdded.importance).toBe(false)
+  })
+
+  test('fails with status code 404 when userId is missing', async () => {
+    const invalidNote = {
+      content: 'This is a note without userId',
+      importance: false
+    }
+
+    await api
+      .post('/api/notes')
+      .send(invalidNote)
+      .expect(404)
+      .expect({ error: "Cannot read property '_id' of null" })
+
+    const { response: notesAtEnd } = await getNotesResponse()
+
+    expect(notesAtEnd).toHaveLength(initialNotes.length)
   })
 })
 
