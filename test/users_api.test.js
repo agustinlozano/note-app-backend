@@ -35,6 +35,20 @@ describe('GET /api/users', () => {
 })
 
 describe('POST /api/users', () => {
+  test('fails with status code 400 if username is already taken', async () => {
+    const { response: usersAtStart } = await getUserResponse()
+    const userAlreadyTaken = initialUsers[0]
+
+    await api
+      .post('/api/users')
+      .send(userAlreadyTaken)
+      .expect(400)
+      .expect('Content-Type', /json/)
+
+    const { response: usersAtEnd } = await getUserResponse()
+    expect(usersAtEnd).toHaveLength(usersAtStart.length)
+  })
+
   test('success with status code 201 when a valid user is passed', async () => {
     const validUser = {
       username: 'MobBebe',
