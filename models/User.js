@@ -14,10 +14,10 @@ const userSchema = new Schema({
     required: true
   },
   passwordHash: String,
-  notes: {
+  notes: [{
     type: Schema.Types.ObjectId,
     ref: 'Note'
-  }
+  }]
 })
 
 userSchema.set('toJSON', {

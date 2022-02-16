@@ -11,7 +11,7 @@ const noteSchema = new Schema({
     required: true
   },
   importance: Boolean,
-  users: {
+  user: {
     type: Schema.Types.ObjectId,
     ref: 'User'
   }
