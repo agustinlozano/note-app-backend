@@ -11,6 +11,7 @@ const {
   initialNotes
 } = require('./notes_helper')
 const { getUserResponse } = require('./users_helper')
+const getAnUserToken = require('./login_helper')
 
 beforeEach(async () => {
   await Note.deleteMany({})
@@ -40,6 +41,7 @@ describe('GET /api/notes', () => {
 
 describe('POST /api/notes', () => {
   test('success with status code 201 when a valid note is passed', async () => {
+    const token = await getAnUserToken()
     const { ids } = await getUserResponse()
     const newNote = {
       content: 'Cats are really funny pets',
@@ -49,6 +51,7 @@ describe('POST /api/notes', () => {
 
     await api
       .post('/api/notes')
+      .set('Authorization', 'Bearer ' + token)
       .send(newNote)
       .expect(201)
       .expect('Content-Type', /json/)
@@ -60,6 +63,7 @@ describe('POST /api/notes', () => {
   })
 
   test('fails with status code 400 when an invalid note is passed', async () => {
+    const token = await getAnUserToken()
     const { ids } = await getUserResponse()
     const invalidNote = {
       importance: true,
@@ -68,6 +72,7 @@ describe('POST /api/notes', () => {
 
     await api
       .post('/api/notes')
+      .set('Authorization', 'Bearer ' + token)
       .send(invalidNote)
       .expect(400)
       .expect({ error: 'Note validation failed: content: Path `content` is required.' })
@@ -77,7 +82,27 @@ describe('POST /api/notes', () => {
     expect(notesAtEnd).toHaveLength(initialNotes.length)
   })
 
+  test('fails with status code 401 when token is missing', async () => {
+    const token = undefined
+    const invalidNote = {
+      content: 'This is a note without userId',
+      importance: false
+    }
+
+    await api
+      .post('/api/notes')
+      .set('Authorization', 'Bearer ' + token)
+      .send(invalidNote)
+      .expect(401)
+      .expect({ error: 'jwt malformed' })
+
+    const { response: notesAtEnd } = await getNotesResponse()
+
+    expect(notesAtEnd).toHaveLength(initialNotes.length)
+  })
+
   test('if a new note has no importance true then it is assigned to false', async () => {
+    const token = await getAnUserToken()
     const { ids } = await getUserResponse()
     const unimportantNote = {
       content: 'This note is not important',
@@ -87,6 +112,7 @@ describe('POST /api/notes', () => {
 
     await api
       .post('/api/notes')
+      .set('Authorization', 'Bearer ' + token)
       .send(unimportantNote)
       .expect(201)
       .expect('Content-Type', /json/)
@@ -97,78 +123,74 @@ describe('POST /api/notes', () => {
     expect(notesAtEnd).toHaveLength(initialNotes.length + 1)
     expect(lastNoteAdded.importance).toBe(false)
   })
-
-  test('fails with status code 404 when userId is missing', async () => {
-    const invalidNote = {
-      content: 'This is a note without userId',
-      importance: false
-    }
-
-    await api
-      .post('/api/notes')
-      .send(invalidNote)
-      .expect(404)
-      .expect({ error: "Cannot read property '_id' of null" })
-
-    const { response: notesAtEnd } = await getNotesResponse()
-
-    expect(notesAtEnd).toHaveLength(initialNotes.length)
-  })
 })
 
 describe('GET /api/notes/id', () => {
   test('a note can be viewed', async () => {
+    const token = await getAnUserToken()
     const { response: notes } = await getNotesResponse()
     const note = notes[0]
 
     await api
       .get(`/api/notes/${note.id}`)
+      .set('Authorization', 'Bearer ' + token)
       .expect(200)
       .expect('Content-Type', /json/)
   })
 
   test('fails with status code 404 when a nonexistent id is passed', async () => {
+    const token = await getAnUserToken()
     const id = await nonexistentId()
 
     await api
       .get(`/api/notes/${id}`)
+      .set('Authorization', 'Bearer ' + token)
       .expect(404)
   })
 
   test('fails with status code 400 when an ivalid id is passed', async () => {
+    const token = await getAnUserToken()
     await api
       .get('/api/notes/12345')
+      .set('Authorization', 'Bearer ' + token)
       .expect(400)
   })
 })
 
 describe('DELETE /api/notes/id', () => {
   test('a note can be deleted', async () => {
+    const token = await getAnUserToken()
     const { response: notes } = await getNotesResponse()
     const note = notes[0]
 
     await api
       .delete(`/api/notes/${note.id}`)
+      .set('Authorization', 'Bearer ' + token)
       .expect(204)
   })
 
   test('fails with status code 404 when a nonexisting id is passed', async () => {
+    const token = await getAnUserToken()
     const id = await nonexistentId()
 
     await api
       .delete(`/api/notes/${id}`)
+      .set('Authorization', 'Bearer ' + token)
       .expect(404)
   })
 
   test('fails with status code 400 when an ivalid id is passed', async () => {
+    const token = await getAnUserToken()
     await api
       .delete('/api/notes/12345')
+      .set('Authorization', 'Bearer ' + token)
       .expect(400)
   })
 })
 
 describe('PUT /api/notes/id', () => {
   test('a note body can ben updated', async () => {
+    const token = await getAnUserToken()
     const { response: notes } = await getNotesResponse()
     const note = notes[0]
 
@@ -180,6 +202,7 @@ describe('PUT /api/notes/id', () => {
 
     await api
       .put(`/api/notes/${note.id}`)
+      .set('Authorization', 'Bearer ' + token)
       .send(updatedNote)
       .expect(204)
 
@@ -189,16 +212,20 @@ describe('PUT /api/notes/id', () => {
   })
 
   test('fails with status code 404 when a nonexisting id is passed', async () => {
+    const token = await getAnUserToken()
     const id = await nonexistentId()
 
     await api
       .put(`/api/notes/${id}`)
+      .set('Authorization', 'Bearer ' + token)
       .expect(404)
   })
 
   test('fails with status code 400 when an ivalid id is passed', async () => {
+    const token = await getAnUserToken()
     await api
       .put('/api/notes/12345')
+      .set('Authorization', 'Bearer ' + token)
       .expect(400)
   })
 })
