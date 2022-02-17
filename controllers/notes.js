@@ -1,6 +1,7 @@
 const noteRouter = require('express').Router()
 const Note = require('../models/Note')
 const User = require('../models/User')
+const tokenExtractor = require('../utils/tokenExtractor')
 
 noteRouter.get('/', async (request, response) => {
   const notes = await Note.find({}).populate('user', {
@@ -10,13 +11,13 @@ noteRouter.get('/', async (request, response) => {
   response.json(notes)
 })
 
-noteRouter.post('/', async (request, response) => {
+noteRouter.post('/', tokenExtractor, async (request, response) => {
   const {
     content,
-    importance = false,
-    user: userId
+    importance = false
   } = request.body
 
+  const { userId } = request
   const user = await User.findById(userId)
 
   const newNote = new Note({
@@ -41,7 +42,7 @@ noteRouter.post('/', async (request, response) => {
   response.status(201).json(savedNote)
 })
 
-noteRouter.get('/:id', async (request, response) => {
+noteRouter.get('/:id', tokenExtractor, async (request, response) => {
   const { id } = request.params
 
   const note = await Note.findById(id)
@@ -52,7 +53,7 @@ noteRouter.get('/:id', async (request, response) => {
   }
 })
 
-noteRouter.delete('/:id', async (request, response) => {
+noteRouter.delete('/:id', tokenExtractor, async (request, response) => {
   const { id } = request.params
 
   const deletedNote = await Note.findByIdAndDelete(id)
@@ -63,7 +64,7 @@ noteRouter.delete('/:id', async (request, response) => {
   }
 })
 
-noteRouter.put('/:id', async (request, response) => {
+noteRouter.put('/:id', tokenExtractor, async (request, response) => {
   const { id } = request.params
   const { body: noteInfo } = request
 
