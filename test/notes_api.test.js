@@ -1,20 +1,21 @@
 const server = require('../index')
 const mongoose = require('mongoose')
 const Note = require('../models/Note')
+const User = require('../models/User')
 const _ = require('lodash')
 const {
   api,
   nonexistentId
-} = require('./helpers')
+} = require('./helper')
 const {
   getNotesResponse,
   initialNotes
 } = require('./notes_helper')
-const { getUserResponse } = require('./users_helper')
 const getAnUserToken = require('./login_helper')
 
 beforeEach(async () => {
   await Note.deleteMany({})
+  await User.deleteMany({})
 
   for (const note of initialNotes) {
     const noteObject = new Note(note)
@@ -42,11 +43,9 @@ describe('GET /api/notes', () => {
 describe('POST /api/notes', () => {
   test('success with status code 201 when a valid note is passed', async () => {
     const token = await getAnUserToken()
-    const { ids } = await getUserResponse()
     const newNote = {
       content: 'Cats are really funny pets',
-      importance: true,
-      user: ids[0]
+      importance: true
     }
 
     await api
@@ -64,10 +63,8 @@ describe('POST /api/notes', () => {
 
   test('fails with status code 400 when an invalid note is passed', async () => {
     const token = await getAnUserToken()
-    const { ids } = await getUserResponse()
     const invalidNote = {
-      importance: true,
-      user: ids[0]
+      importance: true
     }
 
     await api
@@ -103,11 +100,9 @@ describe('POST /api/notes', () => {
 
   test('if a new note has no importance true then it is assigned to false', async () => {
     const token = await getAnUserToken()
-    const { ids } = await getUserResponse()
     const unimportantNote = {
       content: 'This note is not important',
-      importance: undefined,
-      user: ids[0]
+      importance: undefined
     }
 
     await api
